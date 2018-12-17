@@ -20,6 +20,7 @@ class User {
    *    {username, password, first_name, last_name, phone}
    */
   static async register({ username, password, first_name, last_name, phone }) {
+    // console.log('HEEEYEY REGISTER BABY', BCRYPT_WORK_ROUNDS, password);
     const hashedPassword = await bcrypt.hash(password, BCRYPT_WORK_ROUNDS);
     const result = await db.query(
       `INSERT INTO users (
@@ -27,8 +28,9 @@ class User {
         password,
         first_name,
         last_name,
-        phone)
-      VALUES ($1, $2, $3, $4, $5)
+        phone, 
+        join_at)
+      VALUES ($1, $2, $3, $4, $5, current_timestamp)
       RETURNING username`,
       [username, hashedPassword, first_name, last_name, phone]
     );
@@ -115,7 +117,28 @@ class User {
    *   {username, first_name, last_name, phone}
    */
 
-  static async messagesFrom(username) {}
+  static async messagesFrom(username) {
+    const result = await db.query(
+      `SELECT
+        id,
+        to_username,
+        body,
+        sent_at,
+        read_at
+      FROM
+        messages
+      WHERE
+        from_username = $1`,
+      [username]
+    );
+
+    const userObj = result.rows;
+    // if (userObj.length === 0) {
+    //   throw new Error(`No messages from: ${username}`);
+    // }
+
+    return userObj;
+  }
 
   /** Return messages to this user.
    *
@@ -125,7 +148,28 @@ class User {
    *   {id, first_name, last_name, phone}
    */
 
-  static async messagesTo(username) {}
+  static async messagesTo(username) {
+    const result = await db.query(
+      `SELECT
+        id,
+        from_username,
+        body,
+        sent_at,
+        read_at
+      FROM
+        messages
+      WHERE
+        to_username = $1`,
+      [username]
+    );
+
+    const messages = result.rows;
+    // if (userObj.length === 0) {
+    //   throw new Error(`No messages to: ${username}`);
+    // }
+
+    return messages;
+  }
 }
 
 module.exports = User;

@@ -8,7 +8,6 @@ const { SECRET_KEY } = require('../config.js');
 function ensureLoggedIn(req, res, next) {
   try {
     const token = req.body._token || req.query._token;
-    console.log(token);
     let { username } = jwt.verify(token, SECRET_KEY);
     // put username on request as a convenience for routes
     req.username = username;

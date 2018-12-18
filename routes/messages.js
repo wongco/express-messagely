@@ -80,12 +80,6 @@ router.post('/:id/read', async (req, res, next) => {
 
     let messageBefore = await Message.get(+messageId);
 
-    console.log(
-      'to_user',
-      messageBefore.to_user.username,
-      'current user',
-      to_username
-    );
     if (messageBefore.to_user.username === to_username) {
       let message = await Message.markRead(+messageId);
 

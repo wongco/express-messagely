@@ -132,12 +132,12 @@ class User {
       [username]
     );
 
-    const userObj = result.rows;
+    const messages = result.rows;
     // if (userObj.length === 0) {
     //   throw new Error(`No messages from: ${username}`);
     // }
 
-    return userObj;
+    return messages;
   }
 
   /** Return messages to this user.

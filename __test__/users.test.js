@@ -111,6 +111,10 @@ describe('GET /users/:username', async function() {
         _token: 'garbage'
       });
     expect(response.statusCode).toBe(401);
+    expect(response.body.error).toEqual({
+      message: 'Unauthorized',
+      status: 401
+    });
   });
 
   test('Get specific wrong user detail, valid token', async () => {
@@ -120,11 +124,19 @@ describe('GET /users/:username', async function() {
         _token: auth.token
       });
     expect(response.statusCode).toBe(401);
+    expect(response.body.error).toEqual({
+      message: 'Unauthorized',
+      status: 401
+    });
   });
 
   test('Get specific user detail no token', async () => {
     const response = await request(app).get(`/users/${user.username}`);
     expect(response.statusCode).toBe(401);
+    expect(response.body.error).toEqual({
+      message: 'Unauthorized',
+      status: 401
+    });
   });
 });
 
@@ -149,6 +161,10 @@ describe('GET /users/:username/to', async function() {
         _token: 'garbage'
       });
     expect(response.statusCode).toBe(401);
+    expect(response.body.error).toEqual({
+      message: 'Unauthorized',
+      status: 401
+    });
   });
 
   test("Get specific user's to messages fail wrong user token", async () => {
@@ -158,11 +174,19 @@ describe('GET /users/:username/to', async function() {
         _token: auth.token
       });
     expect(response.statusCode).toBe(401);
+    expect(response.body.error).toEqual({
+      message: 'Unauthorized',
+      status: 401
+    });
   });
 
   test("Get specific user's to messages fail no token", async () => {
     const response = await request(app).get(`/users/${user.username}/to`);
     expect(response.statusCode).toBe(401);
+    expect(response.body.error).toEqual({
+      message: 'Unauthorized',
+      status: 401
+    });
   });
 });
 
@@ -174,9 +198,7 @@ describe('GET /users/:username/from', async function() {
         _token: auth.token
       });
     expect(response.statusCode).toBe(200);
-    console.log(response.body);
     const { messages } = response.body;
-    // console.log(messages);
     expect(messages).toHaveLength(2);
     expect(messages[0].body).toEqual('Hello From Bob!');
     expect(messages[1].body).toEqual('Bob Sends XMas Greetings!');
@@ -189,6 +211,10 @@ describe('GET /users/:username/from', async function() {
         _token: 'garbage'
       });
     expect(response.statusCode).toBe(401);
+    expect(response.body.error).toEqual({
+      message: 'Unauthorized',
+      status: 401
+    });
   });
 
   test("Get specific user's from messages fail wrong user token", async () => {
@@ -198,11 +224,19 @@ describe('GET /users/:username/from', async function() {
         _token: auth.token
       });
     expect(response.statusCode).toBe(401);
+    expect(response.body.error).toEqual({
+      message: 'Unauthorized',
+      status: 401
+    });
   });
 
   test("Get specific user's from messages fail no token", async () => {
     const response = await request(app).get(`/users/${user.username}/from`);
     expect(response.statusCode).toBe(401);
+    expect(response.body.error).toEqual({
+      message: 'Unauthorized',
+      status: 401
+    });
   });
 });
 

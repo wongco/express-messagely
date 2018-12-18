@@ -2,8 +2,7 @@
 
 const db = require('../db');
 const bcrypt = require('bcrypt');
-const { SECRET_KEY, BCRYPT_WORK_ROUNDS } = require('../config');
-const jwt = require('jsonwebtoken');
+const { BCRYPT_WORK_ROUNDS } = require('../config');
 
 /** User of the site. */
 
@@ -20,7 +19,6 @@ class User {
    *    {username, password, first_name, last_name, phone}
    */
   static async register({ username, password, first_name, last_name, phone }) {
-    // console.log('HEEEYEY REGISTER BABY', BCRYPT_WORK_ROUNDS, password);
     const hashedPassword = await bcrypt.hash(password, BCRYPT_WORK_ROUNDS);
     const result = await db.query(
       `INSERT INTO users (
@@ -121,7 +119,7 @@ class User {
     const result = await db.query(
       `SELECT
         id,
-        to_username,
+        to_username AS to_user,
         body,
         sent_at,
         read_at
@@ -152,7 +150,7 @@ class User {
     const result = await db.query(
       `SELECT
         id,
-        from_username,
+        from_username AS from_user,
         body,
         sent_at,
         read_at

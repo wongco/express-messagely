@@ -11,8 +11,7 @@ const { ensureLoggedIn, ensureCorrectUser } = require('../middleware/auth');
  **/
 router.get('/', ensureLoggedIn, async (req, res, next) => {
   try {
-    let users = await User.all();
-
+    const users = await User.all();
     return res.json({ users });
   } catch (err) {
     return next(err);
@@ -26,10 +25,8 @@ router.get('/', ensureLoggedIn, async (req, res, next) => {
  **/
 router.get('/:username', ensureCorrectUser, async (req, res, next) => {
   try {
-    let { username } = req.params;
-
-    let user = await User.get(username);
-
+    const { username } = req.params;
+    const user = await User.get(username);
     return res.json({ user });
   } catch (err) {
     return next(err);
@@ -47,19 +44,18 @@ router.get('/:username', ensureCorrectUser, async (req, res, next) => {
  **/
 router.get('/:username/to', ensureCorrectUser, async (req, res, next) => {
   try {
-    let { username } = req.params;
-    let messagesResults = await User.messagesTo(username);
+    const { username } = req.params;
+    const messagesResults = await User.messagesTo(username);
 
-    let messages = [];
+    // for every message, extract specific msg details and from_user details
+    const messagesPromises = messagesResults.map(async message => {
+      const { from_user, ...messageDetails } = message;
+      const fromUserDetails = await User.get(from_user);
+      const { join_at, last_login_at, ...userDetails } = fromUserDetails;
+      return { ...messageDetails, from_user: userDetails };
+    });
 
-    for (let message of messagesResults) {
-      let { id, body, sent_at, read_at, from_user } = message;
-
-      let fromUserDetails = await User.get(from_user);
-      let { join_at, last_login_at, ...userDetails } = fromUserDetails;
-
-      messages.push({ id, body, sent_at, read_at, from_user: userDetails });
-    }
+    const messages = await Promise.all(messagesPromises);
 
     return res.json({ messages });
   } catch (err) {
@@ -78,19 +74,16 @@ router.get('/:username/to', ensureCorrectUser, async (req, res, next) => {
  **/
 router.get('/:username/from', ensureCorrectUser, async (req, res, next) => {
   try {
-    let { username } = req.params;
-    let messagesResults = await User.messagesFrom(username);
+    const { username } = req.params;
+    const messagesResults = await User.messagesFrom(username);
 
-    let messages = [];
-
-    for (let message of messagesResults) {
-      let { id, body, sent_at, read_at, to_user } = message;
-
-      let toUserDetails = await User.get(to_user);
-      let { join_at, last_login_at, ...userDetails } = toUserDetails;
-
-      messages.push({ id, body, sent_at, read_at, to_user: userDetails });
-    }
+    // for every message, extract specific msg details and to_user details
+    const messages = messagesResults.map(async message => {
+      const { to_user, ...messageDetails } = message;
+      const toUserDetails = await User.get(to_user);
+      const { join_at, last_login_at, ...userDetails } = toUserDetails;
+      return { ...messageDetails, to_user: userDetails };
+    });
 
     return res.json({ messages });
   } catch (err) {

@@ -90,15 +90,14 @@ router.post('/sendsms', ensureLoggedIn, async (req, res, next) => {
  **/
 router.post('/:id/read', async (req, res, next) => {
   try {
-    let messageId = req.params.id;
+    const messageId = +req.params.id;
     const token = req.body._token || req.query._token;
-    const payload = jwt.verify(token, SECRET_KEY);
-    const to_username = payload.username;
+    const { username } = jwt.verify(token, SECRET_KEY);
 
-    let messageBefore = await Message.get(+messageId);
+    const messageBefore = await Message.get(messageId);
 
-    if (messageBefore.to_user.username === to_username) {
-      let message = await Message.markRead(+messageId);
+    if (messageBefore.to_user.username === username) {
+      const message = await Message.markRead(messageId);
 
       return res.json({ message });
     }

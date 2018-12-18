@@ -14,11 +14,9 @@ router.post('/login', async (req, res, next) => {
   try {
     const { username, password } = req.body;
     if (await User.authenticate(username, password)) {
-      let _token = jwt.sign({ username }, SECRET_KEY);
-
+      const _token = jwt.sign({ username }, SECRET_KEY);
       return res.json({ _token });
     }
-
     return next({ message: 'Invalid user/password' });
   } catch (err) {
     return next(err);
@@ -34,9 +32,7 @@ router.post('/login', async (req, res, next) => {
 router.post('/register', async (req, res, next) => {
   try {
     await User.register(req.body);
-
-    let _token = jwt.sign({ username: req.body.username }, SECRET_KEY);
-
+    const _token = jwt.sign({ username: req.body.username }, SECRET_KEY);
     return res.json({ _token });
   } catch (err) {
     return next(err);

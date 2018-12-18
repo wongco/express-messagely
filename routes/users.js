@@ -1,15 +1,8 @@
 const express = require('express');
-const bodyParser = require('body-parser');
-const User = require('../models/user');
-const { ensureLoggedIn, ensureCorrectUser } = require('../middleware/auth');
-const { SECRET_KEY } = require('../config');
 const router = new express.Router();
 
-const app = express();
-
-// allow both form-encoded and json body parsing
-app.use(express.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+const User = require('../models/user');
+const { ensureLoggedIn, ensureCorrectUser } = require('../middleware/auth');
 
 /** GET / - get list of users.
  *

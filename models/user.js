@@ -170,6 +170,20 @@ class User {
 
     return messages;
   }
+
+  /** helper function to retreive phone number */
+  static async getPhoneNum(username) {
+    const phoneNum = (await db.query(
+      `SELECT phone FROM users WHERE username = $1`,
+      [username]
+    )).rows[0].phone;
+
+    if (!phoneNum) {
+      throw new Error(`No phone number is available for user: ${username}`);
+    }
+
+    return phoneNum;
+  }
 }
 
 module.exports = User;

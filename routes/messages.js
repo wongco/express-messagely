@@ -1,17 +1,11 @@
 const express = require('express');
-const bodyParser = require('body-parser');
-const jwt = require('jsonwebtoken');
-const { ensureLoggedIn, ensureCorrectUser } = require('../middleware/auth');
-const Message = require('../models/message');
-const User = require('../models/user');
-const { SECRET_KEY } = require('../config');
 const router = new express.Router();
+const jwt = require('jsonwebtoken');
 
-const app = express();
+const Message = require('../models/message');
 
-// allow both form-encoded and json body parsing
-app.use(express.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+const { ensureLoggedIn } = require('../middleware/auth');
+const { SECRET_KEY } = require('../config');
 
 /** GET /:id - get detail of message.
  *
@@ -27,10 +21,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
  **/
 router.get('/:id', ensureLoggedIn, async (req, res, next) => {
   try {
-    let { messageId } = req.params;
+    let { id } = req.params;
     let username = req.username;
 
-    let message = await Message.get(messageId);
+    let message = await Message.get(id);
 
     if (
       username === message.from_user.username ||
@@ -59,6 +53,29 @@ router.post('/', ensureLoggedIn, async (req, res, next) => {
     let message = await Message.create({ from_username, to_username, body });
 
     return res.json({ message });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+/** POST / - send a SMS message.
+ *
+ * {to_username, body} =>
+ *   {message: {id, from_username, to_username, body, sent_at}}
+ *
+ **/
+router.post('/sendsms', ensureLoggedIn, async (req, res, next) => {
+  try {
+    const from_username = req.username;
+    const { to_username, body } = req.body;
+
+    const result = await Message.sendSmsMessage({
+      from_username,
+      to_username,
+      body
+    });
+
+    return res.json({ result });
   } catch (err) {
     return next(err);
   }

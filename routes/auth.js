@@ -1,14 +1,9 @@
 const express = require('express');
-const bodyParser = require('body-parser');
+const router = new express.Router();
 const jwt = require('jsonwebtoken');
+
 const User = require('../models/user');
 const { SECRET_KEY } = require('../config');
-const router = new express.Router();
-
-const app = express();
-// allow both form-encoded and json body parsing
-app.use(express.json());
-app.use(bodyParser.urlencoded({ extended: true }));
 
 /** POST /login - login: {username, password} => {token}
  *
@@ -19,9 +14,9 @@ router.post('/login', async (req, res, next) => {
   try {
     const { username, password } = req.body;
     if (await User.authenticate(username, password)) {
-      let token = jwt.sign({ username }, SECRET_KEY);
+      let _token = jwt.sign({ username }, SECRET_KEY);
 
-      return res.json({ token });
+      return res.json({ _token });
     }
 
     return next({ message: 'Invalid user/password' });
@@ -40,9 +35,9 @@ router.post('/register', async (req, res, next) => {
   try {
     await User.register(req.body);
 
-    let token = jwt.sign({ username: req.body.username }, SECRET_KEY);
+    let _token = jwt.sign({ username: req.body.username }, SECRET_KEY);
 
-    return res.json({ token });
+    return res.json({ _token });
   } catch (err) {
     return next(err);
   }

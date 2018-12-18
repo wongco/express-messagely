@@ -1,25 +1,31 @@
 /** Message class for message.ly */
+const db = require('../db');
+const { TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN } = require('../config');
+const User = require('../models/user');
 
-const db = require("../db");
+/** requires for Twilio */
+const accountSid = TWILIO_ACCOUNT_SID;
+const authToken = TWILIO_AUTH_TOKEN;
+const twilioClient = require('twilio')(accountSid, authToken);
 
 /** Message on the site. */
 
 class Message {
-
   /** register new message -- returns
    *    {id, from_username, to_username, body, sent_at}
    */
 
-  static async create({from_username, to_username, body}) {
+  static async create({ from_username, to_username, body }) {
     const result = await db.query(
-        `INSERT INTO messages (
+      `INSERT INTO messages (
               from_username,
               to_username,
               body,
               sent_at)
             VALUES ($1, $2, $3, current_timestamp)
             RETURNING id, from_username, to_username, body, sent_at`,
-        [from_username, to_username, body]);
+      [from_username, to_username, body]
+    );
 
     return result.rows[0];
   }
@@ -28,11 +34,12 @@ class Message {
 
   static async markRead(id) {
     const result = await db.query(
-        `UPDATE messages
+      `UPDATE messages
            SET read_at = current_timestamp
            WHERE id = $1
            RETURNING id, read_at`,
-        [id]);
+      [id]
+    );
 
     if (!result.rows[0]) {
       throw new Error(`No such message: ${id}`);
@@ -50,7 +57,7 @@ class Message {
 
   static async get(id) {
     const result = await db.query(
-        `SELECT m.id,
+      `SELECT m.id,
                 m.from_username,
                 f.first_name AS from_first_name,
                 f.last_name AS from_last_name,
@@ -66,7 +73,8 @@ class Message {
             JOIN users AS f ON m.from_username = f.username
             JOIN users AS t ON m.to_username = t.username
           WHERE m.id = $1`,
-        [id]);
+      [id]
+    );
 
     // throw new Error(result.rows.length);
     let m = result.rows[0];
@@ -81,20 +89,50 @@ class Message {
         username: m.from_username,
         first_name: m.from_first_name,
         last_name: m.from_last_name,
-        phone: m.from_phone,
+        phone: m.from_phone
       },
       to_user: {
         username: m.to_username,
         first_name: m.to_first_name,
         last_name: m.to_last_name,
-        phone: m.to_phone,
+        phone: m.to_phone
       },
       body: m.body,
       sent_at: m.sent_at,
-      read_at: m.read_at,
+      read_at: m.read_at
+    };
+  }
+
+  /** Send message as SMS */
+
+  static async sendSmsMessage({ from_username, to_username, body }) {
+    const fromPhoneNum = await User.getPhoneNum(from_username);
+    const toPhoneNum = await User.getPhoneNum(to_username);
+
+    // add message to database first normally
+    await Message.create({ from_username, to_username, body });
+
+    // twilioClient promise
+    const twilioPromise = twilioClient.messages.create({
+      body: body,
+      from: `+${fromPhoneNum}`,
+      to: `+${toPhoneNum}`
+    });
+
+    // resolve twilioClient prom
+    const sendResult = await twilioPromise;
+    const { from, to, dateCreated } = sendResult;
+
+    return {
+      message: 'Completed SMS Sending Function',
+      sms: {
+        from,
+        to,
+        body: sendResult.body,
+        date: dateCreated
+      }
     };
   }
 }
-
 
 module.exports = Message;

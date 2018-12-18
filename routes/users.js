@@ -78,12 +78,14 @@ router.get('/:username/from', ensureCorrectUser, async (req, res, next) => {
     const messagesResults = await User.messagesFrom(username);
 
     // for every message, extract specific msg details and to_user details
-    const messages = messagesResults.map(async message => {
+    const messagesPromises = messagesResults.map(async message => {
       const { to_user, ...messageDetails } = message;
       const toUserDetails = await User.get(to_user);
       const { join_at, last_login_at, ...userDetails } = toUserDetails;
       return { ...messageDetails, to_user: userDetails };
     });
+
+    const messages = await Promise.all(messagesPromises);
 
     return res.json({ messages });
   } catch (err) {

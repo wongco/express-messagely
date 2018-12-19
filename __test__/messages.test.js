@@ -20,7 +20,9 @@ let message1;
 let message3;
 
 beforeEach(async () => {
-  const hashedPassword = await bcrypt.hash('1234', 1);
+  await db.query('DELETE FROM users');
+  await db.query('DELETE FROM messages');
+  const hashedPassword = await bcrypt.hash('1234567', 1);
   const result = await db.query(
     `INSERT INTO users (
       username,
@@ -39,7 +41,7 @@ beforeEach(async () => {
     .post('/auth/login')
     .send({
       username: 'bob',
-      password: '1234'
+      password: '1234567'
     });
 
   // store login token and username in auth object
@@ -66,7 +68,7 @@ beforeEach(async () => {
     .post('/auth/login')
     .send({
       username: 'jon',
-      password: '1234'
+      password: '1234567'
     });
 
   // store login token and username in auth object
@@ -93,7 +95,7 @@ beforeEach(async () => {
     .post('/auth/login')
     .send({
       username: 'joe',
-      password: '1234'
+      password: '1234567'
     });
 
   // store login token and username in auth object
@@ -210,6 +212,7 @@ describe('POST /messages/:id/read', async function() {
     expect(response.statusCode).toBe(200);
     expect(response.body.message).toHaveProperty('read_at');
   });
+
   test('Receipient of a message marks it as read (incorrect user)', async () => {
     const response = await request(app)
       .post(`/messages/${message3.id}/read`)

@@ -7,13 +7,13 @@ const { BCRYPT_WORK_ROUNDS } = require('../config');
 /** User of the site. */
 
 class User {
-  // constructor({ username, password, first_name, last_name, phone }) {
-  //   this.username = username;
-  //   this.password = password;
-  //   this.firstName = first_name;
-  //   this.lastName = last_name;
-  //   this.phone = phone;
-  // }
+  constructor({ username, password, first_name, last_name, phone }) {
+    this.username = username;
+    this.password = password;
+    this.firstName = first_name;
+    this.lastName = last_name;
+    this.phone = phone || '';
+  }
 
   /** register new user -- returns
    *    {username, password, first_name, last_name, phone}
@@ -27,8 +27,10 @@ class User {
         first_name,
         last_name,
         phone, 
-        join_at)
-      VALUES ($1, $2, $3, $4, $5, current_timestamp)
+        join_at,
+        last_login_at
+        )
+      VALUES ($1, $2, $3, $4, $5, current_timestamp, current_timestamp)
       RETURNING username`,
       [username, hashedPassword, first_name, last_name, phone]
     );
@@ -53,7 +55,7 @@ class User {
 
   /** Update last_login_at for user */
 
-  static async updateLoginTimestamp(username) {
+  async updateLoginTimestamp(username) {
     const result = await db.query(
       `UPDATE users
         SET last_login_at = current_timestamp
@@ -131,10 +133,6 @@ class User {
     );
 
     const messages = result.rows;
-    // if (userObj.length === 0) {
-    //   throw new Error(`No messages from: ${username}`);
-    // }
-
     return messages;
   }
 
@@ -162,10 +160,6 @@ class User {
     );
 
     const messages = result.rows;
-    // if (userObj.length === 0) {
-    //   throw new Error(`No messages to: ${username}`);
-    // }
-
     return messages;
   }
 

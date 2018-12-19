@@ -2,9 +2,10 @@ const express = require('express');
 const router = new express.Router();
 const jwt = require('jsonwebtoken');
 
+// jsonschema validation
 const { validate } = require('jsonschema');
-const registerUserSchema = require('../schemas/registerUser.json');
-const loginUserSchema = require('../schemas/loginUser.json');
+const registerUserSchema = require('../schemas/registerUserSchema.json');
+const loginUserSchema = require('../schemas/loginUserSchema.json');
 
 const User = require('../models/user');
 const { SECRET_KEY } = require('../config');
@@ -15,26 +16,24 @@ const { SECRET_KEY } = require('../config');
  *
  **/
 router.post('/login', async (req, res, next) => {
-  let validationResult = validate(req.body, loginUserSchema);
-
-  if (!validationResult.valid) {
-    // pass validation errors to error handler
-    //  (the "stack" key is generally the most useful)
-    let message = validationResult.errors.map(error => error.stack);
-    let error = new Error(message);
-    error.status = 400;
-    error.message = message;
-    return next(error);
-  }
-
   try {
+    let validationResult = validate(req.body, loginUserSchema);
+    if (!validationResult.valid) {
+      // pass validation errors to error handler
+      const message = validationResult.errors.map(error => error.stack);
+      let error = new Error(message);
+      error.status = 400;
+      throw error;
+    }
     const { username, password } = req.body;
 
     if (await User.authenticate(username, password)) {
       const _token = jwt.sign({ username }, SECRET_KEY);
       return res.json({ _token });
     }
-    return next({ message: 'Invalid user/password' });
+    let error = new Error('Invalid user/password');
+    error.status = 401;
+    throw error;
   } catch (err) {
     return next(err);
   }
@@ -47,21 +46,21 @@ router.post('/login', async (req, res, next) => {
  *  Make sure to update their last-login!
  */
 router.post('/register', async (req, res, next) => {
-  let validationResult = validate(req.body, registerUserSchema);
-
-  if (!validationResult.valid) {
-    // pass validation errors to error handler
-    //  (the "stack" key is generally the most useful)
-    let message = validationResult.errors.map(error => error.stack);
-    let error = new Error(message);
-    error.status = 400;
-    error.message = message;
-    return next(error);
-  }
-
   try {
+    let validationResult = validate(req.body, registerUserSchema);
+    if (!validationResult.valid) {
+      // pass validation errors to error handler
+      const message = validationResult.errors.map(error => error.stack);
+      let error = new Error(message);
+      error.status = 400;
+      throw error;
+    }
+
     await User.register(req.body);
-    const _token = jwt.sign({ username: req.body.username }, SECRET_KEY);
+
+    const { username } = req.body;
+    const _token = jwt.sign({ username }, SECRET_KEY);
+
     return res.json({ _token });
   } catch (err) {
     return next(err);

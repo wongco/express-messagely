@@ -1,9 +1,9 @@
 /** Message class for message.ly */
 const db = require('../db');
-const { TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN } = require('../config');
 const User = require('../models/user');
 
 /** requires for Twilio */
+const { TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN } = require('../config');
 const accountSid = TWILIO_ACCOUNT_SID;
 const authToken = TWILIO_AUTH_TOKEN;
 const twilioClient = require('twilio')(accountSid, authToken);
@@ -104,7 +104,6 @@ class Message {
   }
 
   /** Send message as SMS */
-
   static async sendSmsMessage({ from_username, to_username, body }) {
     const fromPhoneNum = await User.getPhoneNum(from_username);
     const toPhoneNum = await User.getPhoneNum(to_username);

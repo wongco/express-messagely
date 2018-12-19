@@ -47,7 +47,8 @@ router.get('/:username/to', ensureCorrectUser, async (req, res, next) => {
     const { username } = req.params;
     const messagesResults = await User.messagesTo(username);
 
-    // for every message, extract specific msg details and from_user details
+    /* for each msg, extract specific msg details and 
+       from_user details and return specific output */
     const messagesPromises = messagesResults.map(async message => {
       const { from_user, ...messageDetails } = message;
       const fromUserDetails = await User.get(from_user);
@@ -77,7 +78,8 @@ router.get('/:username/from', ensureCorrectUser, async (req, res, next) => {
     const { username } = req.params;
     const messagesResults = await User.messagesFrom(username);
 
-    // for every message, extract specific msg details and to_user details
+    /* for each msg, extract specific msg details and 
+       to_user details and return specific output */
     const messagesPromises = messagesResults.map(async message => {
       const { to_user, ...messageDetails } = message;
       const toUserDetails = await User.get(to_user);

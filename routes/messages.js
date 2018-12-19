@@ -3,7 +3,7 @@ const router = new express.Router();
 const jwt = require('jsonwebtoken');
 
 const { validate } = require('jsonschema');
-const postMessageSchema = require('../schemas/postMessage.json');
+const postMessageSchema = require('../schemas/postMessageSchema.json');
 
 const Message = require('../models/message');
 

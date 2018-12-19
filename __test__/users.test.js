@@ -14,7 +14,9 @@ let user;
 let user2; // just for length count
 
 beforeEach(async () => {
-  const hashedPassword = await bcrypt.hash('1234', 1);
+  await db.query('DELETE FROM users');
+  await db.query('DELETE FROM messages');
+  const hashedPassword = await bcrypt.hash('1234567', 1);
   const result = await db.query(
     `INSERT INTO users (
       username,
@@ -33,7 +35,7 @@ beforeEach(async () => {
     .post('/auth/login')
     .send({
       username: 'bob',
-      password: '1234'
+      password: '1234567'
     });
 
   // store login token and username in auth object
@@ -80,7 +82,7 @@ beforeEach(async () => {
   });
 });
 
-describe('GET /users', async function() {
+describe('GET /users', function() {
   test('Get all users', async () => {
     const response = await request(app)
       .get('/users')
@@ -93,7 +95,7 @@ describe('GET /users', async function() {
   });
 });
 
-describe('GET /users/:username', async function() {
+describe('GET /users/:username', function() {
   test('Get specific user success', async () => {
     const response = await request(app)
       .get(`/users/${user.username}`)
@@ -140,7 +142,7 @@ describe('GET /users/:username', async function() {
   });
 });
 
-describe('GET /users/:username/to', async function() {
+describe('GET /users/:username/to', function() {
   test("Get specific user's to messages success", async () => {
     const response = await request(app)
       .get(`/users/${user.username}/to`)
@@ -190,7 +192,7 @@ describe('GET /users/:username/to', async function() {
   });
 });
 
-describe('GET /users/:username/from', async function() {
+describe('GET /users/:username/from', function() {
   test("Get specific user's to messages success", async () => {
     const response = await request(app)
       .get(`/users/${user.username}/from`)

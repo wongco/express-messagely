@@ -1,12 +1,12 @@
 /** Message class for message.ly */
 const db = require('../db');
-const { TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN } = require('../config');
+// const { TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN } = require('../config');
 const User = require('../models/user');
 
 /** requires for Twilio */
-const accountSid = TWILIO_ACCOUNT_SID;
-const authToken = TWILIO_AUTH_TOKEN;
-const twilioClient = require('twilio')(accountSid, authToken);
+// const accountSid = TWILIO_ACCOUNT_SID;
+// const authToken = TWILIO_AUTH_TOKEN;
+// const twilioClient = require('twilio')(accountSid, authToken);
 
 /** Message on the site. */
 
@@ -105,34 +105,34 @@ class Message {
 
   /** Send message as SMS */
 
-  static async sendSmsMessage({ from_username, to_username, body }) {
-    const fromPhoneNum = await User.getPhoneNum(from_username);
-    const toPhoneNum = await User.getPhoneNum(to_username);
+  //   static async sendSmsMessage({ from_username, to_username, body }) {
+  //     const fromPhoneNum = await User.getPhoneNum(from_username);
+  //     const toPhoneNum = await User.getPhoneNum(to_username);
 
-    // add message to database first normally
-    await Message.create({ from_username, to_username, body });
+  //     // add message to database first normally
+  //     await Message.create({ from_username, to_username, body });
 
-    // twilioClient promise
-    const twilioPromise = twilioClient.messages.create({
-      body: body,
-      from: `+${fromPhoneNum}`,
-      to: `+${toPhoneNum}`
-    });
+  //     // twilioClient promise
+  //     const twilioPromise = twilioClient.messages.create({
+  //       body: body,
+  //       from: `+${fromPhoneNum}`,
+  //       to: `+${toPhoneNum}`
+  //     });
 
-    // resolve twilioClient prom
-    const sendResult = await twilioPromise;
-    const { from, to, dateCreated } = sendResult;
+  //     // resolve twilioClient prom
+  //     const sendResult = await twilioPromise;
+  //     const { from, to, dateCreated } = sendResult;
 
-    return {
-      message: 'Completed SMS Sending Function',
-      sms: {
-        from,
-        to,
-        body: sendResult.body,
-        date: dateCreated
-      }
-    };
-  }
+  //     return {
+  //       message: 'Completed SMS Sending Function',
+  //       sms: {
+  //         from,
+  //         to,
+  //         body: sendResult.body,
+  //         date: dateCreated
+  //       }
+  //     };
+  //   }
 }
 
 module.exports = Message;

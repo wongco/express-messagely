@@ -1,0 +1,28 @@
+{
+  "definitions": {},
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://example.com/root.json",
+  "type": "object",
+  "title": "The Root Schema",
+  "required": ["to_username", "body"],
+  "properties": {
+    "to_username": {
+      "$id": "#/properties/to_username",
+      "type": "string",
+      "title": "The To_username Schema",
+      "default": "",
+      "examples": ["abcd"],
+      "minLength": 1,
+      "pattern": "^(.*)$"
+    },
+    "body": {
+      "$id": "#/properties/body",
+      "type": "string",
+      "title": "The Body Schema",
+      "default": "",
+      "examples": ["Hello Gin!"],
+      "minLength": 1,
+      "pattern": "^(.*)$"
+    }
+  }
+}

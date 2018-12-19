@@ -2,6 +2,9 @@ const express = require('express');
 const router = new express.Router();
 const jwt = require('jsonwebtoken');
 
+const { validate } = require('jsonschema');
+const postMessageSchema = require('../schemas/postMessage.json');
+
 const Message = require('../models/message');
 
 const { ensureLoggedIn } = require('../middleware/auth');
@@ -32,10 +35,9 @@ router.get('/:id', ensureLoggedIn, async (req, res, next) => {
     ) {
       return res.json({ message });
     }
-
-    return next({ message: 'Unauthorized!' });
+    throw new Error();
   } catch (err) {
-    return next(err);
+    return next({ status: 401, message: 'Unauthorized' });
   }
 });
 
@@ -47,6 +49,18 @@ router.get('/:id', ensureLoggedIn, async (req, res, next) => {
  **/
 router.post('/', ensureLoggedIn, async (req, res, next) => {
   try {
+    let validationResult = validate(req.body, postMessageSchema);
+
+    if (!validationResult.valid) {
+      // pass validation errors to error handler
+      //  (the "stack" key is generally the most useful)
+      let message = validationResult.errors.map(error => error.stack);
+      let error = new Error(message);
+      error.status = 400;
+      error.message = message;
+      return next(error);
+    }
+
     const from_username = req.username;
     let { to_username, body } = req.body;
 
@@ -101,10 +115,9 @@ router.post('/:id/read', async (req, res, next) => {
 
       return res.json({ message });
     }
-
-    return next({ message: 'Unauthorized to read/mark message' });
+    throw new Error();
   } catch (err) {
-    return next(err);
+    return next({ status: 401, message: 'Unauthorized to read/mark message' });
   }
 });
 
